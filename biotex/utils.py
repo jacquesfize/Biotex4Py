@@ -12,6 +12,19 @@ model_per_language = {
 }
 
 def read_patterns_file(language):
+    """
+    Return a dataframe that contains patterns data for a language.
+
+    Parameters
+    ----------
+    language : str
+        language of the patterns
+
+    Returns
+    -------
+    pd.DataFrame
+        patterns data
+    """
     global model_per_language
 
     if not language in model_per_language:
@@ -23,6 +36,16 @@ def read_patterns_file(language):
     return df
 
 def init_spacy(language):
+    """
+    Initialize/Load Spacy model if not already done.
+
+    Parameters
+    ----------
+    language : str
+        language of the spacy model
+
+
+    """
     global SPACY_instance, current_language,model_per_language
     if language not in model_per_language:
         raise ValueError("Language {0} is not implemented in Biotex".format(language))
@@ -37,6 +60,20 @@ def init_spacy(language):
                              " Please install the model using the command {1} ".format(language,command))
 
 def get_pos_and_lemma_text(text,language="fr"):
+    """
+    Get PartOfSpeech data from a text using Spacy.
+
+    Parameters
+    ----------
+    text : str
+    language : str
+        language of the text
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe that contains the partofspeech data
+    """
     init_spacy(language)
     dframcy = DframCy(SPACY_instance)
     doc = dframcy.nlp(text)
@@ -45,6 +82,22 @@ def get_pos_and_lemma_text(text,language="fr"):
     return df
 
 def get_pos_and_lemma_corpus(corpus,language = "fr",n_process=-1):
+    """
+        Get PartOfSpeech data from a text using Spacy.
+
+        Parameters
+        ----------
+        corpus : list of str
+        language : str
+            language of the text
+        n_process : int
+            number of thread used in the spacy parsing process
+
+        Returns
+        -------
+        pd.DataFrame
+            dataframe that contains the partofspeech data
+        """
     init_spacy(language)
     global SPACY_instance
     corpus_data = []

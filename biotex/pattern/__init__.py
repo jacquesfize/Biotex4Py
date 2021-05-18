@@ -6,11 +6,21 @@ import pandas as pd
 
 class Pattern():
     """
-
+    Class that enables to store pattern and match with pattern found in real data.
     """
 
     def __init__(self,language, nb_patterns = 200,freq_pattern_min = 9):
-        """Constructor for Pattern"""
+        """
+        Constructor
+        Parameters
+        ----------
+        language : str
+            pattern language
+        nb_patterns : int
+            number of top patterns used
+        freq_pattern_min : int
+            minimum frequency of the patterns used
+        """
         self.df_patt = read_patterns_file(language)
         basedir = os.path.dirname(__file__)
         filename = os.path.join(basedir,"../resources/treetagger_spacy_mappings/{0}.csv".format(language))
@@ -30,10 +40,28 @@ class Pattern():
         return False,"",0
 
     def match(self,pos_tags_sequence):
+        """
+        Check if a pattern found in real data exists in our pattern database
+        Parameters
+        ----------
+        pos_tags_sequence : list
+            pattern found
+
+        Returns
+        -------
+        bool,str,int
+            if the pattern exists, matched pattern sequence, matched pattern frequency
+        """
         index = self.a[self.patterns == " ".join(pos_tags_sequence)]
         if len(index)>0:
             return True,self.patterns[index[0]],self.frequencies[index[0]]
         return False,"",0
 
     def sum_all_patterns_frquency(self):
+        """
+        Sum of all patterns' frequency in our database.
+        Returns
+        -------
+        int
+        """
         return self.df_patt.frequency.sum()
