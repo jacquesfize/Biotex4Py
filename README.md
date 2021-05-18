@@ -14,19 +14,14 @@ To install Biotex4py, run the following command in your terminal :
 ```shell
 git clone https://github.com/Jacobe2169/Biotex4Py.git
 cd Biotex4py
-python setup.py install
-```
-You can also use pip:
-```shell
-git clone https://github.com/Jacobe2169/Biotex4Py.git
-cd Biotex4py
+pip install -r requirements.txt
 pip install .
 ```
 
 # Get Started
 
 ```python
-from biotex.biotex import Biotex
+from biotex import Biotex
 import pandas as pd
 corpus = ["D'avantage de lignes en commun de bus.",
               'Les dérèglements climatiques (crue, sécheresse)',
