@@ -1,5 +1,28 @@
 # Biotex4py
 
+BIOTEX is a tool that implements state-of-the-art measures for automatic extraction of biomedical terms from free text in English and French. Biotex was proposed in :
+    
+    Juan Antonio Lossio-Ventura, Clement Jonquet, Mathieu Roche, Maguelonne Teisseire. BIOTEX: A system for Biomedical Terminology Extraction, Ranking, and Validation. ISWC: International Semantic Web Conference, Oct 2014, Riva del Garda, Italy. pp.157-160.
+
+This library is a Python implementation of the original code (in Java) available here : [https://github.com/sifrproject/biotex](https://github.com/sifrproject/biotex)
+
+**N.B.** The major difference from the original code lies in the Part-Of-Speech extraction which using now Spacy instead of TreeTagger. Spacy is a famous python library for NLP with great accuracy in different tasks (NER, POS,...).  
+
+# Installation
+
+To install Biotex4py, run the following command in your terminal :
+```shell
+git clone https://github.com/Jacobe2169/Biotex4Py.git
+cd Biotex4py
+python setup.py install
+```
+You can also use pip:
+```shell
+git clone https://github.com/Jacobe2169/Biotex4Py.git
+cd Biotex4py
+pip install .
+```
+
 # Get Started
 
 ```python
