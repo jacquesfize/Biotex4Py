@@ -82,7 +82,10 @@ def okapi(corpus,patterns,opt="AVG"):
     dl_avg = np.mean([len(stats_per_doc[d]) for d in stats_per_doc])
     for ix,doc in stats_per_doc.items():
         max_rank, min_rank = 0., 9999.0
-        max_freq = max([doc[k]["freq"] for k in doc])
+        try:
+        	max_freq = max([doc[k]["freq"] for k in doc])
+        except:
+        	max_freq = 0
         len_doc = len(doc)
         for term,val in doc.items():
             norm_tf = val["freq"]/max_freq
@@ -102,7 +105,10 @@ def tf_idf(corpus,patterns,opt="AVG"):
     general_stats, stats_per_doc = computeStatistics(patterns, corpus=corpus)
     for ix, doc in stats_per_doc.items():
         max_rank, min_rank = 0., 9999.0
-        max_freq = max([doc[k]["freq"] for k in doc])
+        try:
+        	max_freq = max([doc[k]["freq"] for k in doc])
+        except:
+        	max_freq = 0
         len_doc = len(doc)
         for term, val in doc.items():
             norm_tf = val["freq"] / max_freq
