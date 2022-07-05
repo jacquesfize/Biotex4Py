@@ -50,6 +50,18 @@ class Pattern():
         self.patterns = unique_patterns
         self.frequencies = sum_unique_frequencies
 
+
+    def get_longest_pattern(self):
+        """
+        Return the length of the longest pattern available in Patter.patterns
+
+        Returns
+        -------
+        int
+        """
+        word_count = np.vectorize(lambda x : len(x.split(" ")))
+        return np.max(word_count(self.patterns))
+
     def match_slow(self,pos_tags_sequence):
         matched = self.df_patt[self.df_patt.pattern == " ".join(pos_tags_sequence)].copy()
         if len(matched) >0:
