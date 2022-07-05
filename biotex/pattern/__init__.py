@@ -35,6 +35,10 @@ class Pattern():
         self.a = np.arange(len(self.patterns))
 
     def delete_pattern_dupes(self):
+        """
+        Group patterns and their frequencies if their patterns became the same
+        after the "Treetagger -> spacy" operation
+        """
         unique_patterns = np.unique(self.patterns)
         sum_unique_frequencies = np.empty(len(unique_patterns)).astype(int)
         for pat_num in range(len(unique_patterns)):
