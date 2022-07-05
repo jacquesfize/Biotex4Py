@@ -31,7 +31,20 @@ class Pattern():
 
         self.patterns = self.df_patt.pattern.values
         self.frequencies = self.df_patt.frequency.values
+        self.delete_pattern_dupes()
         self.a = np.arange(len(self.patterns))
+
+    def delete_pattern_dupes(self):
+        unique_patterns = np.unique(self.patterns)
+        sum_unique_frequencies = np.empty(len(unique_patterns)).astype(int)
+        for pat_num in range(len(unique_patterns)):
+            dupes_list = np.flatnonzero(np.asarray(self.patterns == unique_patterns[pat_num]))
+            new_frequency = 0
+            for dupe in dupes_list :
+                new_frequency = new_frequency + self.frequencies[dupe]
+            sum_unique_frequencies[pat_num] = new_frequency
+        self.patterns = unique_patterns
+        self.frequencies = sum_unique_frequencies
 
     def match_slow(self,pos_tags_sequence):
         matched = self.df_patt[self.df_patt.pattern == " ".join(pos_tags_sequence)].copy()
