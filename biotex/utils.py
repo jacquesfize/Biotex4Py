@@ -60,7 +60,7 @@ def update_tokenizer(nlp):
                                     token_match=nlp.tokenizer.token_match,
                                     rules=nlp.Defaults.tokenizer_exceptions)
 
-def init_spacy(language):
+def init_spacy(language,tokenize_hyphen = False):
     """
     Initialize/Load Spacy model if not already done.
 
@@ -79,13 +79,14 @@ def init_spacy(language):
         import spacy
         try:
             SPACY_instance = spacy.load(model_per_language[language])
-            SPACY_instance.tokenizer = update_tokenizer(SPACY_instance)
+            if tokenize_hyphen:
+                SPACY_instance.tokenizer = update_tokenizer(SPACY_instance)
         except OSError as e:
             command = "python -m spacy download {0}".format(model_per_language[language])
             raise ValueError("Spacy model for language = {0} is not installed."
                              " Please install the model using the command {1} ".format(language,command))
 
-def get_pos_and_lemma_text(text,language="fr"):
+def get_pos_and_lemma_text(text,language="fr",tokenize_hyphen=False):
     """
     Get PartOfSpeech data from a text using Spacy.
 
@@ -100,14 +101,14 @@ def get_pos_and_lemma_text(text,language="fr"):
     pd.DataFrame
         dataframe that contains the partofspeech data
     """
-    init_spacy(language)
+    init_spacy(language,tokenized_hyphen=tokenize_hyphen)
     dframcy = DframCy(SPACY_instance)
     doc = dframcy.nlp(text)
     df = dframcy.to_dataframe(doc,["text","pos_","lemma_"])
     df.rename(columns={"token_text": "word", "token_pos_": "pos", "token_lemma_":"lemma"},inplace=True)
     return df
 
-def get_pos_and_lemma_corpus(corpus,language = "fr",n_process=-1):
+def get_pos_and_lemma_corpus(corpus,language = "fr",n_process=-1,tokenize_hyphen=False):
     """
         Get PartOfSpeech data from a text using Spacy.
 
@@ -124,7 +125,7 @@ def get_pos_and_lemma_corpus(corpus,language = "fr",n_process=-1):
         pd.DataFrame
             dataframe that contains the partofspeech data
         """
-    init_spacy(language)
+    init_spacy(language,tokenize_hyphen=tokenize_hyphen)
     global SPACY_instance
     corpus_data = []
     for doc in SPACY_instance.pipe(corpus,n_process =n_process):

@@ -21,7 +21,7 @@ class Biotex:
     """
     Class used to run the global process of automatic term extraction
     """
-    def __init__(self,language="fr",number_of_patterns=50,freq_pattern_min = 9):
+    def __init__(self,language="fr",number_of_patterns=50,freq_pattern_min = 5,tokenize_hyphen=False):
         """
         Constructor of the Biotex class
 
@@ -37,6 +37,7 @@ class Biotex:
         if not language in available_language:
             raise ValueError("{0} is not implemented in Biotex yet".format(language)+". Languages available are {0}".format(", ".join(available_language)))
         self.language = language
+        self.tokenize_hyphen = tokenize_hyphen
         self.p = Pattern(language=self.language,freq_pattern_min=freq_pattern_min,nb_patterns=number_of_patterns)
 
 
@@ -80,7 +81,7 @@ class Biotex:
         if measure in one_document_measure:
             raise ValueError("Can't use {0} for corpus.".format(measure))
 
-        corpus_parsed = get_pos_and_lemma_corpus(corpus, "fr", n_process=n_process)
+        corpus_parsed = get_pos_and_lemma_corpus(corpus, "fr", n_process=n_process,tokenize_hyphen=self.tokenize_hyphen)
         return self.parse_output(getattr(mea,measure)(corpus_parsed,self.p,**kwargs))
 
     def extract_term_document(self,text,measure,**kwargs):
@@ -105,7 +106,7 @@ class Biotex:
         if measure not in one_document_measure:
             raise ValueError("Can't use {0} for one document.".format(measure))
 
-        text_parsed = get_pos_and_lemma_text(text, "fr")
+        text_parsed = get_pos_and_lemma_text(text, "fr",tokenize_hyphen=self.tokenize_hyphen)
         return self.parse_output(getattr(mea, measure)(text_parsed, self.p, **kwargs))
 
     def parse_output(self,results):
