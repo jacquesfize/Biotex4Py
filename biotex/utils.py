@@ -2,6 +2,8 @@
 from dframcy import DframCy
 import pandas as pd
 import os
+from spacy.tokenizer import Tokenizer
+from spacy.util import compile_infix_regex
 
 SPACY_instance = None
 current_language = ""
@@ -35,6 +37,29 @@ def read_patterns_file(language):
     # df["pattern"] = df.pattern.apply(str.split)
     return df
 
+def update_tokenizer(nlp):
+    """
+    Return a spacy.Tokenizer which does not tokenize on hyphen infixes
+
+    Parameters
+    ----------
+    language : nlp
+        spacy model after a spacy.load()
+
+    Returns
+    -------
+    spacy.Tokenizer
+        spacy.Tokenizer
+    """
+    inf = list(nlp.Defaults.infixes)
+    inf = [x for x in inf if '-|–|—|--|---|——|~' not in x]
+    infix_re = compile_infix_regex(tuple(inf))
+    return Tokenizer(nlp.vocab, prefix_search=nlp.tokenizer.prefix_search,
+                                    suffix_search=nlp.tokenizer.suffix_search,
+                                    infix_finditer=infix_re.finditer,
+                                    token_match=nlp.tokenizer.token_match,
+                                    rules=nlp.Defaults.tokenizer_exceptions)
+
 def init_spacy(language):
     """
     Initialize/Load Spacy model if not already done.
@@ -54,6 +79,7 @@ def init_spacy(language):
         import spacy
         try:
             SPACY_instance = spacy.load(model_per_language[language])
+            SPACY_instance.tokenizer = update_tokenizer(SPACY_instance)
         except OSError as e:
             command = "python -m spacy download {0}".format(model_per_language[language])
             raise ValueError("Spacy model for language = {0} is not installed."
@@ -107,8 +133,3 @@ def get_pos_and_lemma_corpus(corpus,language = "fr",n_process=-1):
         df.rename(columns={"token_text": "word", "token_pos_": "pos", "token_lemma_": "lemma"}, inplace=True)
         corpus_data.append(df)
     return corpus_data
-
-
-
-
-

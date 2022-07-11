@@ -24,6 +24,7 @@ def computeStatistics(pattern_instance : Pattern, text=None,corpus=None):
     """
     stats_general = {}
     stats_per_doc = {}
+    longest_pat = pattern_instance.get_longest_pattern() + 1 # +1 to offset the double range()
     if not text is None:
         corpus = [text]
     for ix, doc in enumerate(corpus): # doc is a dataframe
@@ -31,7 +32,7 @@ def computeStatistics(pattern_instance : Pattern, text=None,corpus=None):
         words = doc["word"].values
         partofspeech_vals = doc["pos"].values
         for iy,pos in enumerate(partofspeech_vals):
-            for i in range(4):
+            for i in range(longest_pat):
                 pos_seq = [partofspeech_vals[iy+dec] for dec in range(i) if iy+dec <len(partofspeech_vals)]
                 flag,pattern,frequency = pattern_instance.match(pos_seq)
                 if flag:

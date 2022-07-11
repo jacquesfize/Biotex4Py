@@ -36,8 +36,9 @@ class Biotex:
         """
         if not language in available_language:
             raise ValueError("{0} is not implemented in Biotex yet".format(language)+". Languages available are {0}".format(", ".join(available_language)))
-        self.p = Pattern(language="fr",freq_pattern_min=freq_pattern_min,nb_patterns=number_of_patterns)
         self.language = language
+        self.p = Pattern(language=self.language,freq_pattern_min=freq_pattern_min,nb_patterns=number_of_patterns)
+
 
     def measure_verif(self,measure):
         """
