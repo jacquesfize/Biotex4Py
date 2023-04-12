@@ -5,6 +5,7 @@ import os
 from spacy.tokenizer import Tokenizer
 from spacy.util import compile_infix_regex
 import shutil
+import stat
 from tqdm import tqdm
 from joblib import Parallel,delayed
 
@@ -23,7 +24,8 @@ class Corpus:
         self.storage_dir = storage_dir
         if self.storage_dir:
             if os.path.exists(self.storage_dir):
-                shutil.rmtree(self.storage_dir)
+                os.chmod(self.storage_dir, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR) # for windows dir access issue... still not working
+                shutil.rmtree(self.storage_dir, ignore_errors=False)
             os.makedirs(self.storage_dir)
 
         self.n_process = n_process
@@ -153,7 +155,7 @@ def get_pos_and_lemma_text(text,language="fr",tokenize_hyphen=False,use_gpu=Fals
     pd.DataFrame
         dataframe that contains the partofspeech data
     """
-    init_spacy(language,tokenized_hyphen=tokenize_hyphen,use_gpu=use_gpu)
+    init_spacy(language,tokenize_hyphen=tokenize_hyphen,use_gpu=use_gpu)
     dframcy = DframCy(SPACY_instance)
     doc = dframcy.nlp(text)
     df = dframcy.to_dataframe(doc,["text","pos_","lemma_"])

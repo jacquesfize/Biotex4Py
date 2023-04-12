@@ -117,7 +117,7 @@ def tf_idf(corpus,patterns,opt="AVG"):
             max_rank = max(max_rank, rank)
             min_rank = min(min_rank, rank)
             stats_per_doc[ix][term]["rank"] = rank
-            stats_per_doc[ix][term]["rank_norm"] = rank/max_rank#(rank - min_rank) / (max_rank - min_rank)
+            stats_per_doc[ix][term]["rank_norm"] = rank/1+max_rank#(rank - min_rank) / (max_rank - min_rank)
     return apply_opt(general_stats, stats_per_doc, opt)
 
 
@@ -129,7 +129,7 @@ def f_okapi_c(corpus,patterns,opt="AVG"):
     for term in stats_okapi:
         rank_okapi = stats_okapi[term]["rank"]
         rank_c_value = stats_c_value[term]["rank"]
-        stats_final[term]["rank"] = (2*(rank_okapi*rank_c_value))/(rank_okapi+rank_c_value)
+        stats_final[term]["rank"] = (2*(rank_okapi*rank_c_value))/1+(rank_okapi+rank_c_value)
 
     return stats_final
 
@@ -141,7 +141,7 @@ def f_tfidf_c(corpus,patterns,opt="AVG"):
     for term in stats_tfidf:
         rank_tfidf = stats_tfidf[term]["rank"]
         rank_c_value = stats_c_value[term]["rank"]
-        stats_final[term]["rank"] = (2*(rank_tfidf*rank_c_value))/(rank_tfidf+rank_c_value)
+        stats_final[term]["rank"] = (2*(rank_tfidf*rank_c_value))/1+(rank_tfidf+rank_c_value)
 
     return stats_final
 
@@ -159,5 +159,6 @@ def apply_opt(general_stats,stats_per_doc,opt):
             if opt in ["SUM","AVG"]:
                 general_stats[term]["rank"] +=  doc[term]["rank_norm"]
     if opt == "AVG":
-        general_stats[term]["rank"] = general_stats[term]["rank"] / general_stats[term]["num_doc"]
+        for term in general_stats:
+            general_stats[term]["rank"] = general_stats[term]["rank"] / general_stats[term]["num_doc"]
     return general_stats
