@@ -1,15 +1,39 @@
 # coding = utf-8
 import numpy as np
 import os
-from ..utils import read_patterns_file
 import pandas as pd
+
+
+def read_patterns_file(language):
+    """
+    Return a dataframe that contains patterns data for a language.
+
+    Parameters
+    ----------
+    language : str
+        language of the patterns
+
+    Returns
+    -------
+    pd.DataFrame
+        patterns data
+    """
+    model_per_language = ["fr","es","en"]
+
+    if not language in model_per_language:
+        raise ValueError("Language {0} is not implemented in Biotex".format(language))
+    basedir = os.path.dirname(__file__)
+    filename = os.path.join(basedir,"../resources/patterns/Patterns_{language}_TreeTagger.csv".format(language=language))
+    df = pd.read_csv(filename,sep=";",header=None,names="pattern frequency".split())
+    return df
+
 
 class Pattern():
     """
     Class that enables to store pattern and match with pattern found in real data.
     """
 
-    def __init__(self,language, nb_patterns = 200,freq_pattern_min = 9):
+    def __init__(self,language:str, nb_patterns:int = 200,freq_pattern_min:int = 9):
         """
         Constructor
         Parameters
@@ -33,6 +57,8 @@ class Pattern():
         self.frequencies = self.df_patt.frequency.values
         self.delete_pattern_dupes()
         self.a = np.arange(len(self.patterns))
+
+        self.longest_pattern = None
 
     def delete_pattern_dupes(self):
         """
@@ -59,8 +85,10 @@ class Pattern():
         -------
         int
         """
-        word_count = np.vectorize(lambda x : len(x.split(" ")))
-        return np.max(word_count(self.patterns))
+        if not self.longest_pattern:
+            word_count = np.vectorize(lambda x : len(x.split(" ")))
+            self.longest_pattern =  np.max(word_count(self.patterns))
+        return self.longest_pattern
 
     def match_slow(self,pos_tags_sequence):
         matched = self.df_patt[self.df_patt.pattern == " ".join(pos_tags_sequence)].copy()
@@ -68,7 +96,7 @@ class Pattern():
             return True, matched.iloc[0].pattern,matched.iloc[0].frequency
         return False,"",0
 
-    def match(self,pos_tags_sequence):
+    def match(self,pos_tags_sequence:list):
         """
         Check if a pattern found in real data exists in our pattern database
         Parameters
@@ -86,7 +114,7 @@ class Pattern():
             return True,self.patterns[index[0]],self.frequencies[index[0]]
         return False,"",0
 
-    def sum_all_patterns_frquency(self):
+    def sum_all_patterns_frequency(self):
         """
         Sum of all patterns' frequency in our database.
         Returns

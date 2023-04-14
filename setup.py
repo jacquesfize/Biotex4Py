@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='Biotex4Py',
-    version='0.1',
+    version='0.2',
     packages=['biotex', 'biotex.measure', 'biotex.pattern'],
     url='',
     license='MIT',

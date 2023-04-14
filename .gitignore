@@ -141,3 +141,5 @@ cython_debug/
 
 # Custom
 .idea
+test*
+/*.csv

@@ -21,8 +21,8 @@ class Biotex:
     """
     Class used to run the global process of automatic term extraction
     """
-    def __init__(self,language="fr",number_of_patterns=50,freq_pattern_min = 5,tokenize_hyphen=False,storage_dir=None,
-                 progress_bar=True,n_process=1,use_gpu=False):
+    def __init__(self,language="fr",number_of_patterns=50,min_term_freq = 5,freq_pattern_min = 5,tokenize_hyphen=False,storage_dir=None,
+                 debug=True,n_process=1,use_gpu=False):
         """
         Constructor of the Biotex class
 
@@ -41,13 +41,14 @@ class Biotex:
         self.tokenize_hyphen = tokenize_hyphen
         self.p = Pattern(language=self.language,freq_pattern_min=freq_pattern_min,nb_patterns=number_of_patterns)
         self.storage_dir=storage_dir
-        self.progress_bar = progress_bar
+        self.debug = debug
         self.n_process = n_process
         self.use_gpu = use_gpu
 
         if not self.storage_dir and (self.n_process >1 or self.n_process <0):
             raise Exception("To use multi-threading, set a storage directory (parameter 'storage_dir' in Biotex.__init__())")
         
+        self.min_term_freq = min_term_freq
 
     def measure_verif(self,measure):
         """
@@ -89,8 +90,9 @@ class Biotex:
         if measure in one_document_measure:
             raise ValueError("Can't use {0} for corpus.".format(measure))
 
-        corpus_parsed = get_pos_and_lemma_corpus(corpus, "fr", n_process=self.n_process,tokenize_hyphen=self.tokenize_hyphen,storage_dir=self.storage_dir,progress_bar=self.progress_bar,use_gpu=self.use_gpu)
-        return self.parse_output(getattr(mea,measure)(corpus_parsed,self.p,**kwargs))
+        corpus_parsed = get_pos_and_lemma_corpus(corpus, "fr", n_process=self.n_process,tokenize_hyphen=self.tokenize_hyphen,storage_dir=self.storage_dir,debug=self.debug,use_gpu=self.use_gpu)
+        mesure_object = mea.Measure(corpus=corpus_parsed,min_freq_term=self.min_term_freq)
+        return self.parse_output(getattr(mesure_object,measure)(self.p,**kwargs))
 
     def extract_term_document(self,text,measure,**kwargs):
         """
@@ -114,6 +116,10 @@ class Biotex:
         if measure not in one_document_measure:
             raise ValueError("Can't use {0} for one document.".format(measure))
 
+        text_parsed = get_pos_and_lemma_text(text, "fr",tokenize_hyphen=self.tokenize_hyphen,use_gpu=self.use_gpu)
+        mesure_object = mea.Measure(text=text_parsed,min_freq_term=self.min_term_freq)
+        return self.parse_output(getattr(mesure_object,measure)(self.p,**kwargs))
+    
         text_parsed = get_pos_and_lemma_text(text, "fr",tokenize_hyphen=self.tokenize_hyphen,use_gpu=self.use_gpu)
         return self.parse_output(getattr(mea, measure)(text_parsed, self.p, **kwargs))
 
