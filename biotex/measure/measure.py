@@ -17,14 +17,14 @@ from .utils import  contained_in_other_keywords,debug,count_words
 
 class Measure:
 
-    def __init__(self, text=None, corpus=None, min_freq_term = 5,debug=True ) -> None:
+    def __init__(self, text=None, corpus=None, min_freq_term = 5, debug=True) -> None:
         self.general_stats = None
         self.stats_per_doc = None
 
         self.text = text
         self.corpus = corpus
 
-        is_text = isinstance(self.text,pd.DataFrame)
+        is_text = isinstance(self.text,pd.DataFrame) # Weird but true :) 
 
         if is_text and self.corpus:
             warnings.warn(
@@ -39,10 +39,10 @@ class Measure:
         self.debug = debug
 
         if self.debug:
-            logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+            logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
     def computeStatistics(self, patterns):
-        logging.debug("Start to compute corpus statistics")
+        logging.info("Start to compute corpus statistics")
         stats_general = {}
         stats_per_doc = {}
         # +1 to offset the double range()
@@ -97,7 +97,7 @@ class Measure:
 
         self.stats_per_doc = stats_per_doc
         self.general_stats = stats_general
-        logging.debug("Corpus Statistics computed ! ")
+        logging.info("Corpus Statistics computed ! ")
 
     @debug
     def c_value(self, patterns):

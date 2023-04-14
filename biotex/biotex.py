@@ -11,6 +11,7 @@ from .measure import measure as mea
 import pandas as pd
 
 import os
+import logging
 
 available_language = ["fr","en", "es"]
 available_measure = ['c_value','f_okapi_c','f_tfidf_c','l_value','lidf_value','okapi','tf_idf']
@@ -44,6 +45,10 @@ class Biotex:
         self.debug = debug
         self.n_process = n_process
         self.use_gpu = use_gpu
+
+        if self.debug:
+            logging.basicConfig()
+            logging.getLogger().setLevel(logging.INFO)    
 
         if not self.storage_dir and (self.n_process >1 or self.n_process <0):
             raise Exception("To use multi-threading, set a storage directory (parameter 'storage_dir' in Biotex.__init__())")
@@ -91,7 +96,7 @@ class Biotex:
             raise ValueError("Can't use {0} for corpus.".format(measure))
 
         corpus_parsed = get_pos_and_lemma_corpus(corpus, "fr", n_process=self.n_process,tokenize_hyphen=self.tokenize_hyphen,storage_dir=self.storage_dir,debug=self.debug,use_gpu=self.use_gpu)
-        mesure_object = mea.Measure(corpus=corpus_parsed,min_freq_term=self.min_term_freq)
+        mesure_object = mea.Measure(corpus=corpus_parsed,min_freq_term=self.min_term_freq,debug=self.debug)
         return self.parse_output(getattr(mesure_object,measure)(self.p,**kwargs))
 
     def extract_term_document(self,text,measure,**kwargs):
@@ -117,11 +122,8 @@ class Biotex:
             raise ValueError("Can't use {0} for one document.".format(measure))
 
         text_parsed = get_pos_and_lemma_text(text, "fr",tokenize_hyphen=self.tokenize_hyphen,use_gpu=self.use_gpu)
-        mesure_object = mea.Measure(text=text_parsed,min_freq_term=self.min_term_freq)
+        mesure_object = mea.Measure(text=text_parsed,min_freq_term=self.min_term_freq,debug=self.debug)
         return self.parse_output(getattr(mesure_object,measure)(self.p,**kwargs))
-    
-        text_parsed = get_pos_and_lemma_text(text, "fr",tokenize_hyphen=self.tokenize_hyphen,use_gpu=self.use_gpu)
-        return self.parse_output(getattr(mea, measure)(text_parsed, self.p, **kwargs))
 
     def parse_output(self,results):
         """

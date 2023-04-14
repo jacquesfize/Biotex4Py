@@ -49,8 +49,8 @@ def contained_in_other_keywords(term,general_stats_dict):
 
 def debug(func):
     def new_func(*args,**params):
-        logging.debug(f"Compute measure {func.__name__}")
+        logging.info(f"Compute measure {func.__name__}")
         res = func(*args,**params)
-        logging.debug(f"{func.__name__} is done !")
+        logging.info(f"{func.__name__} is done !")
         return res
     return new_func

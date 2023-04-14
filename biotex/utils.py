@@ -1,16 +1,18 @@
 # coding = utf-8
 
+import shutil
+import stat
+import os
+
 # Spacy related
 from spacy.tokenizer import Tokenizer
 from spacy.util import compile_infix_regex
 from dframcy import DframCy
 
-import shutil
-import stat
-import os
+
 from tqdm import tqdm
 import pandas as pd
-from dframcy import DframCy
+
 
 # Instance of spacy used by biotex, singleton
 SPACY_instance = None
