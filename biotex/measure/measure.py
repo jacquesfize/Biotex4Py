@@ -7,17 +7,22 @@ import numpy as np
 import pandas as pd
 import logging
 from tqdm import tqdm
+from ..pattern import Pattern
 
 
 from .utils import  contained_in_other_keywords,debug,count_words
 
-
+def indexOf(value,list):
+    try:
+        return list.index(value)
+    except:
+        return None
 
 
 
 class Measure:
 
-    def __init__(self, text=None, corpus=None, min_freq_term = 5, debug=True) -> None:
+    def __init__(self, text=None, corpus=None, min_freq_term = 5, must_include_keywords= [],debug=True) -> None:
         self.general_stats = None
         self.stats_per_doc = None
 
@@ -36,53 +41,86 @@ class Measure:
         
         
         self.min_freq_term = min_freq_term
+        self.must_include_keywords = must_include_keywords
+        self.max_length_keywords = max([len(word.split()) for word in self.must_include_keywords])
         self.debug = debug
 
         if self.debug:
             logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+
+    @staticmethod
+    def update_stat(term,lemmas_,frequency,pattern,document_index,word_index,stats_general,stats_per_doc):
+        
+        if not term in stats_general:
+            stats_general[term] = {
+                "freq": 1,
+                "new_freq": 0,
+                "num_doc": 1,
+                "last_saw": document_index,
+                "pattern_used": pattern,
+                "pattern_freq": frequency,
+                "num_words": count_words(term),
+                "lemma_": " ".join([lemmas_[word_index+dec] for dec in range(len(term.split()))])
+            }
+        elif term in stats_general:
+            stats_general[term]["freq"] += 1
+            if document_index < stats_general[term]["last_saw"]:
+                stats_general[term]["last_saw"] = document_index
+                stats_general[term]["num_doc"] += 1
+
+        if term not in stats_per_doc[document_index]:
+            stats_per_doc[document_index][term] = {
+                "freq": 0,
+                "new_freq": 0
+            }
+        stats_per_doc[document_index][term]["freq"] += 1
+    
+    
 
     def computeStatistics(self, patterns):
         logging.info("Start to compute corpus statistics")
         stats_general = {}
         stats_per_doc = {}
         # +1 to offset the double range()
-        longest_pat = patterns.get_longest_pattern() + 1
+        longest_pat = patterns.get_longest_pattern() 
 
 
-        for ix, doc in enumerate(self.corpus):  # doc is a dataframe
-            stats_per_doc[ix] = {}
+        for document_index, doc in enumerate(self.corpus):  # doc is a dataframe
+            stats_per_doc[document_index] = {}
             words = doc["word"].values
+            lemmas_ = doc["lemma"].values
             partofspeech_vals = doc["pos"].values
-            for iy, pos in enumerate(partofspeech_vals):
-                for i in range(longest_pat):
-                    pos_seq = [partofspeech_vals[iy+dec]
-                               for dec in range(i) if iy+dec < len(partofspeech_vals)]
+            for word_position, pos in enumerate(partofspeech_vals):
+                # Checking for partOfSpeech pattern matches
+                for i in range(1,longest_pat+1):
+                    pos_seq = [partofspeech_vals[word_position+dec]
+                               for dec in range(i) if word_position+dec < len(partofspeech_vals)]
                     flag, pattern, frequency = patterns.match(pos_seq)
                     if flag:
                         term = " ".join(
-                            [words[iy+dec] for dec in range(i) if iy+dec < len(partofspeech_vals)]).lower()
-                        if not term in stats_general:
-                            stats_general[term] = {
-                                "freq": 1,
-                                "new_freq": 0,
-                                "num_doc": 1,
-                                "last_saw": ix,
-                                "pattern_used": pattern,
-                                "pattern_freq": frequency,
-                                "num_words": count_words(term)
-                            }
-                        elif term in stats_general:
-                            stats_general[term]["freq"] += 1
-                            if ix < stats_general[term]["last_saw"]:
-                                stats_general[term]["last_saw"] = ix
-                                stats_general[term]["num_doc"] += 1
+                            [words[word_position+dec] for dec in range(i) if word_position+dec < len(partofspeech_vals)]).lower()
+                        Measure.update_stat(term=term,
+                                         lemmas_=lemmas_,frequency=frequency,pattern=pattern,
+                                         document_index=document_index,word_index=word_position,
+                                         stats_general=stats_general,stats_per_doc=stats_per_doc)
+                
+                # Check for if user specified keywords here
+                if not self.must_include_keywords:     
+                    continue   
 
-                        if term not in stats_per_doc[ix]:
-                            stats_per_doc[ix][term] = {
-                                "freq": 0,
-                                "new_freq": 0
-                            }
-                        stats_per_doc[ix][term]["freq"] += 1
+                for i in range(1,self.max_length_keywords+1):
+                    phrase = [words[word_position+dec]
+                               for dec in range(i) if word_position+dec < len(partofspeech_vals)]
+                    # print(phrase)
+                    index_ = indexOf(" ".join(phrase), self.must_include_keywords)
+                    if index_:
+                        
+                        Measure.update_stat(term=self.must_include_keywords[index_],
+                                         lemmas_=lemmas_,frequency=1,pattern="User_defined",
+                                         document_index=document_index,word_index=word_position,
+                                         stats_general=stats_general,stats_per_doc=stats_per_doc)
+
+                
 
         todel = []
         for term,values in stats_general.items():

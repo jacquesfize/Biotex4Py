@@ -71,7 +71,7 @@ class Biotex:
             raise ValueError("Measure {0} does not exists !\n"
                              "Please select a measure from the following:\n {1}".format(measure,"\n - ".join(available_measure)))
 
-    def extract_term_corpus(self,corpus,measure,**kwargs):
+    def extract_term_corpus(self,corpus,measure,must_include_keywords=[],**kwargs):
         """
         Return a dataframe that contains terms extracted from a corpus.
         Parameters
@@ -96,7 +96,7 @@ class Biotex:
             raise ValueError("Can't use {0} for corpus.".format(measure))
 
         corpus_parsed = get_pos_and_lemma_corpus(corpus, "fr", n_process=self.n_process,tokenize_hyphen=self.tokenize_hyphen,storage_dir=self.storage_dir,debug=self.debug,use_gpu=self.use_gpu)
-        mesure_object = mea.Measure(corpus=corpus_parsed,min_freq_term=self.min_term_freq,debug=self.debug)
+        mesure_object = mea.Measure(corpus=corpus_parsed,min_freq_term=self.min_term_freq,debug=self.debug,must_include_keywords=must_include_keywords)
         return self.parse_output(getattr(mesure_object,measure)(self.p,**kwargs))
 
     def extract_term_document(self,text,measure,**kwargs):
