@@ -42,7 +42,10 @@ class Measure:
         
         self.min_freq_term = min_freq_term
         self.must_include_keywords = must_include_keywords
-        self.max_length_keywords = max([len(word.split()) for word in self.must_include_keywords])
+        self.max_length_keywords = 0
+        if self.must_include_keywords: # if not empty
+            self.max_length_keywords = max([len(word.split()) for word in self.must_include_keywords])
+
         self.debug = debug
 
         if self.debug:
